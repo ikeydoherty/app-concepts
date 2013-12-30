@@ -1,7 +1,7 @@
 /*
  * sandbox.c - Testing app sandboxing
  *
- * NOTE: This currently hard-codes gedit as the app to launch, exposes
+ * NOTE: This currently hard-codes idemoapp as the app to launch, exposes
  * /run/ to the client application and requires being run setuid.
  * 
  * Copyright 2013 Ikey Doherty <ikey.doherty@gmail.com>
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 {
         printf("Running execution\n");
         int rc, status, child_pid, wpid;
-        char *name = "gedit";
+        char *name = "idemoapp";
         char *args[] = { name, NULL };
         __cleanup__ char **envp = NULL;
         __cleanup__ char *work_dir = NULL;
