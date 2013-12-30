@@ -16,6 +16,9 @@ include_HEADERS = \
 lib_LTLIBRARIES = \
 	libiportal.la
 
+bin_PROGRAMS = \
+	isandbox
+
 libiportal_la_SOURCES = \
 	src/include/iportal.h \
 	src/core/iportal.c
@@ -28,3 +31,9 @@ libiportal_la_CFLAGS = \
 libiportal_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(GIO_UNIX_LIBS)
+
+isandbox_SOURCES = \
+	src/sandbox/sandbox.c
+
+isandbox_CFLAGS = \
+	$(AM_CFLAGS)
