@@ -20,8 +20,8 @@ lib_LTLIBRARIES = \
 	libiportal.la
 
 install-exec-hook:
-	chown root:root $(bindir)/isandbox
-	chmod ug+s $(bindir)/isandbox
+	chown root:root $(DESTDIR)$(bindir)/isandbox
+	chmod ug+s $(DESTDIR)$(bindir)/isandbox
 
 portal-glue.h: src/core/org.example.Portal.Manager.xml
 		gdbus-codegen --generate-c-code portal-glue \
