@@ -45,7 +45,8 @@ isandbox_CFLAGS = \
 
 idemoapp_SOURCES = \
 	src/demo/idemo-app.c \
-	src/demo/idemo-app.h
+	src/demo/idemo-app.h \
+	src/demo/idemo-app-main.c
 
 idemoapp_CFLAGS = \
 	$(GTK3_CFLAGS) \
