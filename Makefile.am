@@ -32,7 +32,8 @@ BUILT_SOURCES = \
 
 bin_PROGRAMS = \
 	isandbox \
-	idemoapp
+	idemoapp \
+	iportald
 
 libiportal_la_SOURCES = \
 	src/include/iportal.h \
@@ -64,4 +65,16 @@ idemoapp_CFLAGS = \
 
 idemoapp_LDADD = \
 	$(GTK3_LIBS) \
+	$(GIO_UNIX_LIBS)
+
+iportald_SOURCES = \
+	portal-glue.h \
+	portal-glue.c \
+	src/core/iportald.c
+
+iportald_CFLAGS = \
+	$(GIO_UNIX_CFLAGS) \
+	$(AM_CFLAGS)
+
+iportald_LDADD = \
 	$(GIO_UNIX_LIBS)
