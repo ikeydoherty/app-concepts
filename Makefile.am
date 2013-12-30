@@ -21,7 +21,8 @@ install-exec-hook:
 	chmod ug+s $(bindir)/isandbox
 
 bin_PROGRAMS = \
-	isandbox
+	isandbox \
+	idemoapp
 
 libiportal_la_SOURCES = \
 	src/include/iportal.h \
@@ -41,3 +42,15 @@ isandbox_SOURCES = \
 
 isandbox_CFLAGS = \
 	$(AM_CFLAGS)
+
+idemoapp_SOURCES = \
+	src/demo/idemo-app.c \
+	src/demo/idemo-app.h
+
+idemoapp_CFLAGS = \
+	$(GTK3_CFLAGS) \
+	$(AM_CFLAGS)
+
+idemoapp_LDADD = \
+	$(GTK3_LIBS) \
+	$(GIO_UNIX_LIBS)

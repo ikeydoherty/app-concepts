@@ -15,6 +15,8 @@ AC_PROG_CC
 # PkgConfig tests
 PKG_CHECK_MODULES([GIO_UNIX], [gio-unix-2.0])
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
+# GTK3 required for IDemoApp
+PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.8.0])
 
 AC_OUTPUT
 
