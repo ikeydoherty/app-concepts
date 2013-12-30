@@ -10,6 +10,9 @@ AM_CPPFLAGS = \
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
+include_HEADERS = \
+	src/include/iportal.h
+
 lib_LTLIBRARIES = \
 	libiportal.la
 
