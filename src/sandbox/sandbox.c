@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <errno.h>
 
 #define JAIL "./jail"
 
@@ -114,7 +115,7 @@ char** cleaned_env(void)
 
         array = malloc(sizeof(char**));
         if (!array) {
-                fprintf(stderr, "Unable to allocate memory: %m\n");
+                fprintf(stderr, "Unable to allocate memory: %s\n", strerror(errno));
                 return NULL;
         }
         /* Searching environment */
@@ -125,7 +126,7 @@ char** cleaned_env(void)
                 if (str_in_array(permitted_vars, key)) {
                         array = (char**)realloc(array, (size_t)(sizeof(char**))*length+1);
                         if (!array) {
-                                fprintf(stderr, "Memory failure: %m\n");
+                                fprintf(stderr, "Memory failure: %s\n", strerror(errno));
                                 return NULL;
                         }
                         array[index] = kTmp;
@@ -139,7 +140,7 @@ char** cleaned_env(void)
                 /* Null terminate this array */
                 array = realloc(array, (size_t)(sizeof(char*))*index+1);
                 if (!array) {
-                        fprintf(stderr, "Memory failure: %m\n");
+                        fprintf(stderr, "Memory failure: %s\n", strerror(errno));
                         return NULL;
                 }
                 length++;
@@ -199,7 +200,7 @@ int main(int argc, char **argv)
         /* Construct fake home directory mount */
         asprintf(&tmpfs_home, "%s/home", work_dir);
         if (!tmpfs_home) {
-                fprintf(stderr, "Error: %m\n");
+                fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
         fprintf(stdout, "Home dir is: %s\n", tmpfs_home);
@@ -207,45 +208,45 @@ int main(int argc, char **argv)
         /* Construct a path for the procfs */
         asprintf(&proc_dir, "%s/proc", work_dir);
         if (!proc_dir) {
-                fprintf(stderr, "Error: %m\n");
+                fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Construct a path for the /tmp fs */
         asprintf(&tmp_dir, "%s/tmp", work_dir);
         if (!tmp_dir) {
-                fprintf(stderr, "Error: %m\n");
+                fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Construct a path for the /run fs */
         asprintf(&run_dir, "%s/run", work_dir);
         if (!run_dir) {
-                fprintf(stderr, "Error: %m\n");
+                fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Unshare FS and PID */
         if ((rc = unshare(CLONE_NEWNS | CLONE_NEWPID)) < 0) {
-                fprintf(stderr, "Unable to unshare! %m\n");
+                fprintf(stderr, "Unable to unshare! %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Bind mount root file system */
         if ((rc = mount("/", work_dir, "", MS_BIND, "") < 0)) {
-                fprintf(stderr, "Unable to mount! %m\n");
+                fprintf(stderr, "Unable to mount! %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
         /* Bind remount read only root file system */
         if ((rc = mount("/", work_dir, "",
                 MS_BIND | MS_REMOUNT| MS_RDONLY, "")) < 0) {
-                fprintf(stderr, "Unable to remount! %m\n");
+                fprintf(stderr, "Unable to remount! %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Bind mount run dir */
         if ((rc = mount("/run", run_dir, "", MS_BIND, "")) < 0) {
-                fprintf(stderr, "Unable to bind-mount /run: %m\n");
+                fprintf(stderr, "Unable to bind-mount /run: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
@@ -253,34 +254,34 @@ int main(int argc, char **argv)
         if ((child_pid = fork()) == 0) {
                 /* Enter the jail */
                 if ((rc = chdir(work_dir)) < 0) {
-                        fprintf(stderr, "Unable to chdir! %m\n");
+                        fprintf(stderr, "Unable to chdir! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = chroot(work_dir)) < 0) {
-                        fprintf(stderr, "Unable to chroot! %m\n");
+                        fprintf(stderr, "Unable to chroot! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = mount("proc", "proc", "proc",
                         0, "")) < 0) {
-                        fprintf(stderr, "Unable to mount proc! %m\n");
+                        fprintf(stderr, "Unable to mount proc! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = mount("none", "/tmp", "tmpfs",
                         0, "")) < 0) {
-                        fprintf(stderr, "Unable to mount tmp! %m\n");
+                        fprintf(stderr, "Unable to mount tmp! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = mount("none", "/home/", "tmpfs",
                         MS_NOEXEC | MS_NOATIME, "")) < 0) {
-                        fprintf(stderr, "Unable to mount home! %m\n");
+                        fprintf(stderr, "Unable to mount home! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = mkdir(home_dir, 0755)) < 0) {
-                        fprintf(stderr, "Unable to create home directory! %m\n");
+                        fprintf(stderr, "Unable to create home directory! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = chown(home_dir, uid, gid)) < 0) {
-                        fprintf(stderr, "Unable to chown to user! %m\n");
+                        fprintf(stderr, "Unable to chown to user! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
 
@@ -295,7 +296,7 @@ int main(int argc, char **argv)
 
                 /* Replace ourselves with the new process */
                 if ((rc = execvpe(name, args, envp)) < 0) {
-                        fprintf(stderr, "Error launching: %m\n");
+                        fprintf(stderr, "Error launching: %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
         } else {
@@ -305,27 +306,27 @@ int main(int argc, char **argv)
                 fprintf(stdout, "Child finished\n");
                 /* Unmount the temporary home */
                 if ((rc = umount2(tmpfs_home, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %m\n");
+                        fprintf(stderr, "Error! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 /* Unmount the temporary proc */
                 if ((rc = umount2(proc_dir, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %m\n");
+                        fprintf(stderr, "Error! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 /* Unmount the temporary .. /tmp */
                 if ((rc = umount2(tmp_dir, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %m\n");
+                        fprintf(stderr, "Error! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 /* Unmount the temporary /run */
                 if ((rc = umount2(run_dir, MNT_DETACH)) < 0) {
-                        fprintf(stderr, "Error! %m\n");
+                        fprintf(stderr, "Error! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 /* Detach the bind point */
                 if ((rc = umount2(work_dir, MNT_DETACH)) < 0) {
-                        fprintf(stderr, "Error! %m\n");
+                        fprintf(stderr, "Error! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
         }
