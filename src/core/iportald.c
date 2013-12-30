@@ -25,11 +25,25 @@
 
 #include "portal-glue.h"
 
+static GDBusObjectManagerServer *manager = NULL;
+
 static void on_bus_acquired(GDBusConnection *connection,
                             const gchar *name,
                             gpointer userdata)
 {
-        /* TODO: Implement */
+        GDBusObjectSkeleton *object;
+        PortalManager *portal;
+
+        /* TL;DR: Export manager on /org/example/Portal/Manager/0 */
+
+        manager = g_dbus_object_manager_server_new("/org/example/Portal/Manager");
+        portal = portal_manager_skeleton_new();
+        object = g_dbus_object_skeleton_new("/org/example/Portal/Manager/0");
+        g_dbus_object_skeleton_add_interface(object, G_DBUS_INTERFACE_SKELETON(portal));
+        g_dbus_object_manager_server_export(manager, G_DBUS_OBJECT_SKELETON(object));
+        g_object_unref(object);
+
+        g_dbus_object_manager_server_set_connection(manager, connection);
 }
 
 static void on_name_acquired(GDBusConnection *connection,
