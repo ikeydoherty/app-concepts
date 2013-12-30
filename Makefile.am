@@ -13,6 +13,9 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 include_HEADERS = \
 	src/include/iportal.h
 
+EXTRA_DIST = \
+	src/core/org.example.Portal.Manager.xml
+
 lib_LTLIBRARIES = \
 	libiportal.la
 
