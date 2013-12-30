@@ -1,0 +1,21 @@
+<node>
+  <!-- org.example.Portal.Manager:
+       @short_description: Portal Manager
+
+       This D-Bus interface is used to manage portal access
+    -->
+  <interface name="org.example.Portal.Manager">
+    <!--
+        GetPortalFD:
+        @program: Get file descriptor from portal
+
+        Method used to open non-sandboxed file descriptor
+      -->
+    <method name="GetPortalFD">
+      <arg direction="in" type="s" name="portal"/>
+      <annotation name="org.gtk.GDBus.C.UnixFD" value="true" />
+      <arg direction="out" type="h"/>
+    </method>
+  </interface>
+</node>
+

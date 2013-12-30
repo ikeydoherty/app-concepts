@@ -20,6 +20,16 @@ install-exec-hook:
 	chown root:root $(bindir)/isandbox
 	chmod ug+s $(bindir)/isandbox
 
+portal-glue.h: src/core/org.example.Portal.Manager.xml
+		gdbus-codegen --generate-c-code portal-glue \
+		--c-namespace Portal \
+		--c-generate-object-manager \
+		--interface-prefix org.example.Portal \
+		$<
+
+BUILT_SOURCES = \
+	portal-glue.h
+
 bin_PROGRAMS = \
 	isandbox \
 	idemoapp

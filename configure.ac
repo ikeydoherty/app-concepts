@@ -18,6 +18,9 @@ PKG_CHECK_MODULES([GLIB], [glib-2.0])
 # GTK3 required for IDemoApp
 PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.8.0])
 
+AC_ARG_VAR([GDBUS_CODEGEN], [The gdbus-codegen executable])
+AC_PATH_PROG([GDBUS_CODEGEN], [gdbus-codegen])
+
 AC_OUTPUT
 
 AC_MSG_RESULT([
