@@ -30,6 +30,12 @@ static void i_demo_app_class_init(IDemoAppClass *klass);
 static void i_demo_app_init(IDemoApp *self);
 static void i_demo_app_dispose(GObject *object);
 
+/* In-sandbox file chooser */
+static void sandy_file_cb(GtkWidget *widget, gpointer userdata);
+
+/* Outside the sandbox */
+static void world_file_cb(GtkWidget *widget, gpointer userdata);
+
 /* Initialisation */
 static void i_demo_app_class_init(IDemoAppClass *klass)
 {
@@ -61,9 +67,13 @@ static void i_demo_app_init(IDemoApp *self)
 
         /* Buttons currently non-functioning */
         button = gtk_button_new_with_label("Open files inside sandbox");
+        g_signal_connect(button, "clicked", G_CALLBACK(sandy_file_cb),
+                self);
         gtk_box_pack_start(GTK_BOX(layout), button, FALSE, FALSE, 5);
 
         button = gtk_button_new_with_label("Open files outside sandbox");
+        g_signal_connect(button, "clicked", G_CALLBACK(world_file_cb),
+                self);
         gtk_box_pack_start(GTK_BOX(layout), button, FALSE, FALSE, 5);
 
         gtk_window_set_title(GTK_WINDOW(self), "IDemoApp");
@@ -86,4 +96,25 @@ GtkWidget* i_demo_app_new(void)
 
         self = g_object_new(I_DEMO_APP_TYPE, NULL);
         return GTK_WIDGET(self);
+}
+
+
+static void sandy_file_cb(GtkWidget *widget, gpointer userdata)
+{
+        GtkWidget *dialog;
+
+        dialog = gtk_file_chooser_dialog_new("Sandboxed",
+                GTK_WINDOW(userdata), GTK_FILE_CHOOSER_ACTION_OPEN,
+                "Cancel", GTK_RESPONSE_CANCEL,
+                "Open", GTK_RESPONSE_ACCEPT,
+                NULL);
+        if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+                /* Do something with the file? */
+        }
+        gtk_widget_destroy(dialog);
+}
+
+static void world_file_cb(GtkWidget *widget, gpointer userdata)
+{
+        /* Not yet implemented */
 }
