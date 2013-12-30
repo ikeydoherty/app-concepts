@@ -16,6 +16,10 @@ include_HEADERS = \
 lib_LTLIBRARIES = \
 	libiportal.la
 
+install-exec-hook:
+	chown root:root $(bindir)/isandbox
+	chmod ug+s $(bindir)/isandbox
+
 bin_PROGRAMS = \
 	isandbox
 
