@@ -32,7 +32,6 @@ AC_MSG_RESULT([
         sbindir:                ${sbindir}
         datarootdir:            ${datarootdir}
         mandir:                 ${mandir}
-        modules:                ${MODULEDIR}
 
         compiler:               ${CC}
         cflags:                 ${CFLAGS}
