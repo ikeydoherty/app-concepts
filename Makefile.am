@@ -60,7 +60,8 @@ isandbox_CFLAGS = \
 idemoapp_SOURCES = \
 	src/demo/idemo-app.c \
 	src/demo/idemo-app.h \
-	src/demo/idemo-app-main.c
+	src/demo/idemo-app-main.c \
+	portal-glue.c
 
 idemoapp_CFLAGS = \
 	$(GTK3_CFLAGS) \
@@ -77,7 +78,9 @@ iportald_SOURCES = \
 
 iportald_CFLAGS = \
 	$(GIO_UNIX_CFLAGS) \
+	$(GTK3_CFLAGS) \
 	$(AM_CFLAGS)
 
 iportald_LDADD = \
-	$(GIO_UNIX_LIBS)
+	$(GIO_UNIX_LIBS) \
+	$(GTK3_LIBS)

@@ -22,6 +22,7 @@
  */
 
 #include "idemo-app.h"
+#include "portal-glue.h"
 
 G_DEFINE_TYPE(IDemoApp, i_demo_app, GTK_TYPE_WINDOW)
 
@@ -116,5 +117,21 @@ static void sandy_file_cb(GtkWidget *widget, gpointer userdata)
 
 static void world_file_cb(GtkWidget *widget, gpointer userdata)
 {
-        /* Not yet implemented */
+        PortalManagerProxy *manager;
+        GError *error = NULL;
+        GVariant *fd_list = NULL;
+
+        manager = portal_manager_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
+                "org.example.Portal.Manager",
+                "/org/example/Portal/Manager/0",
+                NULL,
+                &error);
+        if (error) {
+                g_printerr("Unable to connect to d-bus service! %s\n", error->message);
+                g_error_free(error);
+                g_error("Aborting\n");
+        }
+
+        portal_manager_call_get_portal_fd_sync(manager, "file", &fd_list, NULL, &error);
 }

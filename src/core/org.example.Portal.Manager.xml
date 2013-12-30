@@ -13,8 +13,10 @@
       -->
     <method name="GetPortalFD">
       <arg direction="in" type="s" name="portal"/>
-      <annotation name="org.gtk.GDBus.C.UnixFD" value="true" />
-      <arg direction="out" type="h"/>
+
+      <arg direction="out" type="s">
+        <annotation name="org.gtk.GDBus.C.UnixFD" value="true" />
+      </arg>
     </method>
   </interface>
 </node>

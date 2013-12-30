@@ -22,10 +22,39 @@
  */
 
 #include <stdlib.h>
+#include <gtk/gtk.h>
+#include <gio/gunixfdlist.h>
 
 #include "portal-glue.h"
 
 static GDBusObjectManagerServer *manager = NULL;
+
+static gboolean on_get_portal_fd(PortalManager *portals,
+                                 GDBusMethodInvocation  *invocation,
+                                 gchar *portal,
+                                 gpointer user_data)
+{
+        GtkWidget *dialog;
+        GUnixFDList *list;
+
+        dialog = gtk_file_chooser_dialog_new("Not Sandboxed",
+                NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+                "Cancel", GTK_RESPONSE_CANCEL,
+                "Open", GTK_RESPONSE_ACCEPT,
+                NULL);
+        if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT) {
+                g_dbus_method_invocation_return_dbus_error(invocation,
+                        "org.example.Portal.Manager.Error.NoFile",
+                        "Unable to complete without a valid file");
+                goto end;
+        }
+        list = g_unix_fd_list_new(); 
+        portal_manager_complete_get_portal_fd(portals, invocation, list);
+        g_free(list);
+end:
+        gtk_widget_destroy(dialog);
+        return TRUE;
+}
 
 static void on_bus_acquired(GDBusConnection *connection,
                             const gchar *name,
@@ -40,6 +69,7 @@ static void on_bus_acquired(GDBusConnection *connection,
         portal = portal_manager_skeleton_new();
         object = g_dbus_object_skeleton_new("/org/example/Portal/Manager/0");
         g_dbus_object_skeleton_add_interface(object, G_DBUS_INTERFACE_SKELETON(portal));
+        g_signal_connect(portal, "handle-get-portal-fd", G_CALLBACK(on_get_portal_fd), NULL);
         g_dbus_object_manager_server_export(manager, G_DBUS_OBJECT_SKELETON(object));
         g_object_unref(object);
 
@@ -61,6 +91,7 @@ static void on_name_lost(GDBusConnection *connection,
 int main(int argc, char **argv)
 {
         GMainLoop *loop;
+        gtk_init(&argc, &argv);
         guint id;
 
         loop = g_main_loop_new(NULL, FALSE);
