@@ -108,7 +108,7 @@ static char *permitted_vars[] = {
 
 char** cleaned_env(void)
 {
-        int i = 0, index = 0, length = 0;
+        size_t i = 0, index = 0, length = 0;
         char *key = NULL;
         char **array = NULL;
         char *clone = NULL;
@@ -124,7 +124,7 @@ char** cleaned_env(void)
                 key = strtok(clone, "=");
                 /* If permitted, copy this permitted <K,V> pair into the new array */
                 if (str_in_array(permitted_vars, key)) {
-                        array = (char**)realloc(array, (size_t)(sizeof(char**))*length+1);
+                        array = (char**)realloc(array, (sizeof(char**))*length+1);
                         if (!array) {
                                 fprintf(stderr, "Memory failure: %s\n", strerror(errno));
                                 return NULL;
@@ -138,7 +138,7 @@ char** cleaned_env(void)
         }
         if (length > 0) {
                 /* Null terminate this array */
-                array = realloc(array, (size_t)(sizeof(char*))*index+1);
+                array = realloc(array, (sizeof(char*))*index+1);
                 if (!array) {
                         fprintf(stderr, "Memory failure: %s\n", strerror(errno));
                         return NULL;
