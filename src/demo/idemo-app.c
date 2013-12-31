@@ -23,6 +23,7 @@
 
 #include "idemo-app.h"
 #include "portal-glue.h"
+#include "iportal.h"
 
 G_DEFINE_TYPE(IDemoApp, i_demo_app, GTK_TYPE_WINDOW)
 
@@ -133,5 +134,5 @@ static void world_file_cb(GtkWidget *widget, gpointer userdata)
                 g_error("Aborting\n");
         }
 
-        portal_manager_call_get_portal_fd_sync(manager, "file", &fd_list, NULL, &error);
+        portal_manager_call_get_portal_fd_sync(manager, I_PORTAL_FILES, &fd_list, NULL, &error);
 }

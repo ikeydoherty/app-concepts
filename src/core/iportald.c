@@ -26,6 +26,7 @@
 #include <gio/gunixfdlist.h>
 
 #include "portal-glue.h"
+#include "iportal.h"
 
 static GDBusObjectManagerServer *manager = NULL;
 
@@ -37,22 +38,28 @@ static gboolean on_get_portal_fd(PortalManager *portals,
         GtkWidget *dialog;
         GUnixFDList *list;
 
-        dialog = gtk_file_chooser_dialog_new("Not Sandboxed",
-                NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
-                "Cancel", GTK_RESPONSE_CANCEL,
-                "Open", GTK_RESPONSE_ACCEPT,
-                NULL);
-        if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT) {
-                g_dbus_method_invocation_return_dbus_error(invocation,
-                        "org.example.Portal.Manager.Error.NoFile",
-                        "Unable to complete without a valid file");
-                goto end;
-        }
-        list = g_unix_fd_list_new(); 
-        portal_manager_complete_get_portal_fd(portals, invocation, list);
-        g_free(list);
+        if (g_str_equal(portal, I_PORTAL_FILES)) {
+                dialog = gtk_file_chooser_dialog_new("Not Sandboxed",
+                        NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+                        "Cancel", GTK_RESPONSE_CANCEL,
+                        "Open", GTK_RESPONSE_ACCEPT,
+                        NULL);
+                if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT) {
+                        g_dbus_method_invocation_return_dbus_error(invocation,
+                                "org.example.Portal.Manager.Error.NoFile",
+                                "Unable to complete without a valid file");
+                        goto end;
+                }
+                list = g_unix_fd_list_new();
+                portal_manager_complete_get_portal_fd(portals, invocation, list);
+                g_free(list);
 end:
-        gtk_widget_destroy(dialog);
+                gtk_widget_destroy(dialog);
+        } else {
+                g_dbus_method_invocation_return_dbus_error(invocation,
+                        "org.example.Portal.Manager.Unknown",
+                        "Unknown portal");
+        }
         return TRUE;
 }
 

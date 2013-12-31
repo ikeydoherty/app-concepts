@@ -40,6 +40,11 @@ typedef union IPortalData {
 } IPortalData;
 
 /**
+ * Request a file handler
+ */
+#define I_PORTAL_FILES "files"
+
+/**
  * Retrieve a Portal by name
  * @param name Requested portal name
  * @return the requested IPortal, or NULL if not found
