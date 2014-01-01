@@ -22,6 +22,7 @@
  */
 
 #include <stdlib.h>
+#include <fcntl.h>
 #include <gtk/gtk.h>
 #include <gio/gunixfdlist.h>
 
@@ -32,13 +33,17 @@ static GDBusObjectManagerServer *manager = NULL;
 
 static gboolean on_get_portal_fd(PortalManager *portals,
                                  GDBusMethodInvocation  *invocation,
+                                 GUnixFDList *unused,
                                  gchar *portal,
                                  gpointer user_data)
 {
         GtkWidget *dialog;
         GUnixFDList *list;
+        GError *error = NULL;
 
         if (g_str_equal(portal, I_PORTAL_FILES)) {
+                gchar *filename;
+                int fd;
                 dialog = gtk_file_chooser_dialog_new("Not Sandboxed",
                         NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
                         "Cancel", GTK_RESPONSE_CANCEL,
@@ -51,8 +56,15 @@ static gboolean on_get_portal_fd(PortalManager *portals,
                         goto end;
                 }
                 list = g_unix_fd_list_new();
+                filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+                fd = open(filename, O_RDONLY);
+                g_unix_fd_list_append(list, fd, &error);
+                if (error) {
+                        g_message("Error in copying fd: %s", error->message);
+                        g_error_free(error);
+                }
+                g_free(filename);
                 portal_manager_complete_get_portal_fd(portals, invocation, list);
-                g_free(list);
 end:
                 gtk_widget_destroy(dialog);
         } else {

@@ -20,6 +20,8 @@
  * 
  * 
  */
+#include <gio/gunixfdlist.h>
+#include <fcntl.h>
 
 #include "idemo-app.h"
 #include "portal-glue.h"
@@ -120,7 +122,10 @@ static void world_file_cb(GtkWidget *widget, gpointer userdata)
 {
         PortalManagerProxy *manager;
         GError *error = NULL;
-        GVariant *fd_list = NULL;
+        GUnixFDList *fd_list = NULL;
+        gint fd;
+        GMappedFile *file;
+        gchar *contents = NULL;
 
         manager = portal_manager_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
                 G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
@@ -134,5 +139,17 @@ static void world_file_cb(GtkWidget *widget, gpointer userdata)
                 g_error("Aborting\n");
         }
 
-        portal_manager_call_get_portal_fd_sync(manager, I_PORTAL_FILES, &fd_list, NULL, &error);
+        portal_manager_call_get_portal_fd_sync(manager, I_PORTAL_FILES, NULL, &fd_list, NULL, &error);
+        g_message("Got %d file descriptors", g_unix_fd_list_get_length(fd_list));
+
+        fd = g_unix_fd_list_get(fd_list, 0, NULL);
+        file = g_mapped_file_new_from_fd(fd, FALSE, &error);
+        if (error) {
+                g_printerr("Unable to open mapped file: %s\n", error->message);
+                g_error_free(error);
+        }
+        contents = g_mapped_file_get_contents(file);
+        printf("Contents: %s\n", contents);
+        g_mapped_file_unref(file);
+        close(fd);
 }
