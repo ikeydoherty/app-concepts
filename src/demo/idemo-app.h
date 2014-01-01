@@ -39,6 +39,7 @@ typedef struct _IDemoAppClass   IDemoAppClass;
 /* IDemoApp object */
 struct _IDemoApp {
         GtkWindow parent;
+        GtkWidget *text;
 };
 
 /* IDemoApp class definition */
