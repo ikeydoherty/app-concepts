@@ -95,7 +95,7 @@ static void i_demo_app_init(IDemoApp *self)
 
         gtk_window_set_title(GTK_WINDOW(self), "IDemoApp");
         gtk_window_set_position(GTK_WINDOW(self), GTK_WIN_POS_CENTER);
-        gtk_window_set_default_size(GTK_WINDOW(self), 300, 300);
+        gtk_window_set_default_size(GTK_WINDOW(self), 400, 550);
         g_signal_connect(self, "destroy", gtk_main_quit, NULL);
         gtk_widget_show_all(GTK_WIDGET(self));
 }
