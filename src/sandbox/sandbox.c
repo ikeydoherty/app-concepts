@@ -160,9 +160,6 @@ int main(int argc, char **argv)
         char *args[] = { name, NULL };
         __cleanup__ char **envp = NULL;
         __cleanup__ char *work_dir = NULL;
-        __cleanup__ char *tmpfs_home = NULL;
-        __cleanup__ char *proc_dir = NULL;
-        __cleanup__ char *tmp_dir = NULL;
         __cleanup__ char *run_dir = NULL;
         const char *home_dir = NULL;
         uid_t uid, euid;
@@ -199,25 +196,6 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
         }
         fprintf(stdout, "Work dir is: %s\n", work_dir);
-
-        /* Construct fake home directory mount */
-        if (!asprintf(&tmpfs_home, "%s/home", work_dir)) {
-                fprintf(stderr, "Error: %s\n", strerror(errno));
-                return EXIT_FAILURE;
-        }
-        fprintf(stdout, "Home dir is: %s\n", tmpfs_home);
-
-        /* Construct a path for the procfs */
-        if (!asprintf(&proc_dir, "%s/proc", work_dir)) {
-                fprintf(stderr, "Error: %s\n", strerror(errno));
-                return EXIT_FAILURE;
-        }
-
-        /* Construct a path for the /tmp fs */
-        if (!asprintf(&tmp_dir, "%s/tmp", work_dir)) {
-                fprintf(stderr, "Error: %s\n", strerror(errno));
-                return EXIT_FAILURE;
-        }
 
         /* Construct a path for the /run fs */
         if (!asprintf(&run_dir, "%s/run", work_dir)) {
@@ -286,8 +264,6 @@ int main(int argc, char **argv)
 
                 /* Cleanup required in fork because of execvpe */
                 free(work_dir);
-                free(tmpfs_home);
-                free(proc_dir);
 
                 /* Drop all permissions and become calling user */
                 if ((rc = seteuid(uid)) != 0) {
@@ -310,31 +286,6 @@ int main(int argc, char **argv)
                         continue;
                 }
                 fprintf(stdout, "Child finished\n");
-                /* Unmount the temporary home */
-                if ((rc = umount2(tmpfs_home, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %s\n", strerror(errno));
-                        return EXIT_FAILURE;
-                }
-                /* Unmount the temporary proc */
-                if ((rc = umount2(proc_dir, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %s\n", strerror(errno));
-                        return EXIT_FAILURE;
-                }
-                /* Unmount the temporary .. /tmp */
-                if ((rc = umount2(tmp_dir, MNT_FORCE)) < 0) {
-                        fprintf(stderr, "Error! %s\n", strerror(errno));
-                        return EXIT_FAILURE;
-                }
-                /* Unmount the temporary /run */
-                if ((rc = umount2(run_dir, MNT_DETACH)) < 0) {
-                        fprintf(stderr, "Error! %s\n", strerror(errno));
-                        return EXIT_FAILURE;
-                }
-                /* Detach the bind point */
-                if ((rc = umount2(work_dir, MNT_DETACH)) < 0) {
-                        fprintf(stderr, "Error! %s\n", strerror(errno));
-                        return EXIT_FAILURE;
-                }
         }
         printf("Left execution\n");
 	return 0;
