@@ -5,6 +5,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADERS([config.h])
 AC_PREFIX_DEFAULT(/usr/local)
+AM_SILENT_RULES([yes])
 
 LT_PREREQ(2.2)
 LT_INIT([disable-static])
