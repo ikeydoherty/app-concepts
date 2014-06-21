@@ -3,7 +3,7 @@ Testing concepts required for deployable Linux Desktop Apps
 NOTE:
 ---
 isandbox is used to launch idemoapp in a read only bind-mounted root
-file system (chroot'd) and drops privileges back to the calling user,
+file system (via pivot_root) and drops privileges back to the calling user,
 taking advantage of the setuid bits to accomplish its mission.
 
 The app will use a GtkFileChooser within its own process to
