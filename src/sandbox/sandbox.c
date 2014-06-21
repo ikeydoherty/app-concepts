@@ -201,30 +201,26 @@ int main(int argc, char **argv)
         fprintf(stdout, "Work dir is: %s\n", work_dir);
 
         /* Construct fake home directory mount */
-        asprintf(&tmpfs_home, "%s/home", work_dir);
-        if (!tmpfs_home) {
+        if (!asprintf(&tmpfs_home, "%s/home", work_dir)) {
                 fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
         fprintf(stdout, "Home dir is: %s\n", tmpfs_home);
 
         /* Construct a path for the procfs */
-        asprintf(&proc_dir, "%s/proc", work_dir);
-        if (!proc_dir) {
+        if (!asprintf(&proc_dir, "%s/proc", work_dir)) {
                 fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Construct a path for the /tmp fs */
-        asprintf(&tmp_dir, "%s/tmp", work_dir);
-        if (!tmp_dir) {
+        if (!asprintf(&tmp_dir, "%s/tmp", work_dir)) {
                 fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
 
         /* Construct a path for the /run fs */
-        asprintf(&run_dir, "%s/run", work_dir);
-        if (!run_dir) {
+        if (!asprintf(&run_dir, "%s/run", work_dir)) {
                 fprintf(stderr, "Error: %s\n", strerror(errno));
                 return EXIT_FAILURE;
         }
@@ -294,8 +290,15 @@ int main(int argc, char **argv)
                 free(proc_dir);
 
                 /* Drop all permissions and become calling user */
-                seteuid(uid);
-                setegid(gid);
+                if ((rc = seteuid(uid)) != 0) {
+                        fprintf(stderr, "Unable to seteuid: %s\n", strerror(errno));
+                        abort();
+                }
+
+                if ((rc = setegid(gid)) != 0) {
+                        fprintf(stderr, "Unable to setegid: %s\n", strerror(errno));
+                        abort();
+                }
 
                 /* Replace ourselves with the new process */
                 if ((rc = execvpe(name, args, envp)) < 0) {
