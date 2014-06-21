@@ -26,6 +26,7 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/mount.h>
@@ -37,6 +38,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <errno.h>
+
+#define pivot_root(new_root,put_old) syscall(SYS_pivot_root,new_root,put_old)
 
 #define JAIL "./jail"
 
@@ -257,8 +260,8 @@ int main(int argc, char **argv)
                         fprintf(stderr, "Unable to chdir! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
-                if ((rc = chroot(work_dir)) < 0) {
-                        fprintf(stderr, "Unable to chroot! %s\n", strerror(errno));
+                if ((rc = pivot_root(".", "tmp")) < 0) {
+                        fprintf(stderr, "Unable to pivot_root! %s\n", strerror(errno));
                         return EXIT_FAILURE;
                 }
                 if ((rc = mount("proc", "proc", "proc",
